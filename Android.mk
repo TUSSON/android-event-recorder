@@ -19,9 +19,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	event_recorder.c
 
-LOCAL_SHARED_LIBRARIES := \
-	libcutils libutils
-
 #LOCAL_CFLAGS += -UNDEBUG
 #LOCAL_LDFLAGS := -D_ANDROID_ -lm -llog
 LOCAL_MODULE_TAGS := optional
