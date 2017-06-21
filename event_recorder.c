@@ -190,7 +190,7 @@ int events_sort(struct device_events *dev_events)
     return 0;
 }
 
-int events_playback(const struct device_events *dev_events)
+int events_replay(const struct device_events *dev_events)
 {
     int i = 0;
 
@@ -280,8 +280,9 @@ static void usage (char *name)
 {
     fprintf(stderr,
 "Android event record/palyback utility - $Revision: 0.1 $\n\n"
-"Usage：%s -r|p <event_record.txt>\n\n"
-"  -r|p  Record or playback events  (default record)\n\n"
+"Usage：%s -r|p [-c count] <event_record.txt>\n\n"
+"  -r|p       Record or replay events  (default record)\n\n"
+"  -c count   Repeat count for replay\n\n"
 "Example of event_record.txt: \n"
 "[   20897.702414] /dev/input/event1: 0003 0035 000000b1\n"
 "[   20897.702414] /dev/input/event1: 0000 0000 00000000\n" ,
@@ -292,14 +293,27 @@ name);
 int main(int argc, char *argv[])
 {
     char *filename = NULL;
-    int is_playback = 0;
+    int is_replay = 0;
+    int replay_count = 1;
 
     int opt;
 
     for (opt = 1; opt < argc; opt++) {
         if (argv[opt][0] == '-') {
-            if (argv[opt][1] == 'p')
-                is_playback = 1;
+            switch (argv[opt][1]) {
+            case 'p':
+                is_replay = 1;
+                break;
+            case 'c':
+                if (opt + 1 >= argc)
+                    usage(argv[0]);
+
+                replay_count = atoi(argv[opt+1]);
+                opt++;
+                break;
+            default:
+                break;
+            }
         } else {
             filename = argv[opt];
         }
@@ -308,14 +322,18 @@ int main(int argc, char *argv[])
     if (filename == NULL)
         usage(argv[0]);
 
-    if (is_playback) {
+    if (is_replay) {
         struct device_events dev_events;
 
         events_create(filename, &dev_events);
 
         events_sort(&dev_events);
 
-        events_playback(&dev_events);
+        while (replay_count != 0) {
+            events_replay(&dev_events);
+            if (replay_count > 0)
+                replay_count--;
+        } 
 
         events_free(&dev_events);
     } else {
