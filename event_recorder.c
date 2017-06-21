@@ -279,10 +279,11 @@ int events_recorder(struct device_fd_table *fd_table, const char *filename)
 static void usage (char *name)
 {
     fprintf(stderr,
-"Android event record/palyback utility - $Revision: 0.1 $\n\n"
-"Usage：%s -r|p [-c count] <event_record.txt>\n\n"
-"  -r|p       Record or replay events  (default record)\n\n"
-"  -c count   Repeat count for replay\n\n"
+"Android event record/palyback utility - $Revision: 1.0 $\n\n"
+"Usage：%s -r|p [-c count] [-d second] <event_record.txt>\n\n"
+"  -r|p        Record or replay events  (default record)\n\n"
+"  -c count    Repeat count for replay\n\n"
+"  -d secound  Delay for everytime replay start\n\n"
 "Example of event_record.txt: \n"
 "[   20897.702414] /dev/input/event1: 0003 0035 000000b1\n"
 "[   20897.702414] /dev/input/event1: 0000 0000 00000000\n" ,
@@ -295,6 +296,7 @@ int main(int argc, char *argv[])
     char *filename = NULL;
     int is_replay = 0;
     int replay_count = 1;
+    int64_t replay_delay_us = 0;
 
     int opt;
 
@@ -309,6 +311,15 @@ int main(int argc, char *argv[])
                     usage(argv[0]);
 
                 replay_count = atoi(argv[opt+1]);
+                opt++;
+                break;
+            case 'd':
+                if (opt + 1 >= argc)
+                    usage(argv[0]);
+
+                replay_delay_us = atof(argv[opt+1]) * 1000000;
+                if (replay_delay_us < 0)
+                    replay_delay_us = 0;
                 opt++;
                 break;
             default:
@@ -333,7 +344,8 @@ int main(int argc, char *argv[])
             events_replay(&dev_events);
             if (replay_count > 0)
                 replay_count--;
-        } 
+            usleep(replay_delay_us);
+        }
 
         events_free(&dev_events);
     } else {

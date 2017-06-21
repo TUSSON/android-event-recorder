@@ -42,16 +42,17 @@ $ adb shell inputrec /data/local/tmp/record_test.txt -p
 ### Help
 ```bash
 $ adb shell eventrec
-Android event record/palyback utility - $Revision: 0.1 $
+Android event record/palyback utility - $Revision: 1.0 $
 
-Usage：eventrec -r|p <event_record.txt>
+Usage：eventrec -r|p [-c count] [-d second] <event_record.txt>
 
   -r|p       Record or replay events  (default record)
 
   -c count   Repeat count for replay
 
+  -d secound  delay for everytime replay start
+
 Example of event_record.txt:
 [   20897.702414] /dev/input/event1: 0003 0035 000000b1
 [   20897.702414] /dev/input/event1: 0000 0000 00000000
 ```
-
