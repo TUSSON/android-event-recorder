@@ -1,6 +1,6 @@
 # android-event-recorder
 ### What it is ?
-> a tool to record/replay input event for android platform.
+> a tool to record/replay input event for android platform, automated testing will be easier.
 
 ### Installation
 * Install from binary
@@ -30,13 +30,13 @@ adb shell /data/local/tmp/eventrec
 ### Usage
 * record input event
 ```bash
-$ adb shell inputrec /data/local/tmp/record_test.txt
+$ adb shell eventrec /data/local/tmp/record_test.txt
 ```
 ctrl-c to stop it.
 
 * replay input event
 ```bash
-$ adb shell inputrec /data/local/tmp/record_test.txt -p
+$ adb shell eventrec /data/local/tmp/record_test.txt -p
 ```
 
 ### Help
