@@ -10,6 +10,7 @@
 #include <sys/poll.h>
 #include <linux/input.h>
 #include <errno.h>
+#include <unistd.h>
 
 struct device_event {
     int fd;
@@ -279,11 +280,13 @@ int events_recorder(struct device_fd_table *fd_table, const char *filename)
 static void usage (char *name)
 {
     fprintf(stderr,
-"Android event record/palyback utility - $Revision: 1.0 $\n\n"
+"Android event record/palyback utility - $Revision: 1.1 $\n\n"
 "Usage：%s -r|p [-c count] [-d second] <event_record.txt>\n\n"
-"  -r|p        Record or replay events  (default record)\n\n"
-"  -c count    Repeat count for replay\n\n"
-"  -d secound  Delay for everytime replay start\n\n"
+"  -r|p                 Record or replay events  (default record)\n\n"
+"  -c count             Repeat count for replay\n\n"
+"  -d min_sec[,max_sec] Delay for everytime replay start (default 1.0)\n"
+"                       If the minimum and maximum values of the delay\n"
+"                       are provided, the delay is random.\n\n"
 "Example of event_record.txt: \n"
 "[   20897.702414] /dev/input/event1: 0003 0035 000000b1\n"
 "[   20897.702414] /dev/input/event1: 0000 0000 00000000\n" ,
@@ -297,6 +300,7 @@ int main(int argc, char *argv[])
     int is_replay = 0;
     int replay_count = 1;
     int64_t replay_delay_us = 0;
+    int64_t replay_delay_us_max = 0;
 
     int opt;
 
@@ -313,15 +317,28 @@ int main(int argc, char *argv[])
                 replay_count = atoi(argv[opt+1]);
                 opt++;
                 break;
-            case 'd':
+            case 'd': {
+                const char *str;
                 if (opt + 1 >= argc)
                     usage(argv[0]);
 
+                str = argv[opt+1];
+
                 replay_delay_us = atof(argv[opt+1]) * 1000000;
                 if (replay_delay_us < 0)
-                    replay_delay_us = 0;
+                    replay_delay_us = 1.0;
+
+
+                str = strchr(str, ',');
+                if (str != NULL)
+                    replay_delay_us_max = atof(str+1) * 1000000;
+
+                if (replay_delay_us_max <= 0)
+                    replay_delay_us_max = replay_delay_us;
+
                 opt++;
                 break;
+            }
             default:
                 break;
             }
@@ -341,10 +358,19 @@ int main(int argc, char *argv[])
         events_sort(&dev_events);
 
         while (replay_count != 0) {
+            int64_t delay_us = 0;
+            if (replay_delay_us == replay_delay_us_max) {
+                delay_us = replay_delay_us;
+            } else {
+                int64_t range = replay_delay_us_max - replay_delay_us + 1;
+                delay_us = random() % range + replay_delay_us;
+            }
+
             events_replay(&dev_events);
             if (replay_count > 0)
                 replay_count--;
-            usleep(replay_delay_us);
+            usleep(delay_us);
+            printf("[%d]replay delay us:%d\n", replay_count, delay_us);
         }
 
         events_free(&dev_events);

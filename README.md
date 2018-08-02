@@ -2,6 +2,8 @@
 ### What it is ?
 > a tool to record/replay input event for android platform, automated testing will be easier.
 
+![](https://github.com/TUSSON/android-event-recorder/blob/master/res/demo.gif)
+
 ### Installation
 * Install from binary
 
@@ -42,15 +44,17 @@ $ adb shell eventrec /data/local/tmp/record_test.txt -p
 ### Help
 ```bash
 $ adb shell eventrec
-Android event record/palyback utility - $Revision: 1.0 $
+Android event record/palyback utility - $Revision: 1.1 $
 
-Usage：eventrec -r|p [-c count] [-d second] <event_record.txt>
+Usage：./eventrec -r|p [-c count] [-d second] <event_record.txt>
 
-  -r|p       Record or replay events  (default record)
+-r|p                 Record or replay events  (default record)
 
-  -c count   Repeat count for replay
+-c count             Repeat count for replay
 
-  -d secound  delay for everytime replay start
+-d min_sec[,max_sec] Delay for everytime replay start (default 1.0)
+                     If the minimum and maximum values of the delay
+                     are provided, the delay is random.
 
 Example of event_record.txt:
 [   20897.702414] /dev/input/event1: 0003 0035 000000b1
